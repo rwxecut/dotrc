@@ -1,0 +1,11 @@
+#!/usr/bin/perl -w
+
+$devclass=$ARGV[0];
+$devname=$ARGV[1];
+$mountroot="/mnt";
+
+exit unless $devclass == 2;
+for ($dir = glob "$mountroot/$devname*")
+{
+	rmdir $dir;
+}

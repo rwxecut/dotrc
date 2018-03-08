@@ -1,0 +1,41 @@
+#!/usr/bin/perl -w
+
+$screen = 1;
+$font = "Terminus:size=9";
+
+%bat_fg =
+(
+	0 => "",
+	1 => "^fg(yellow)",
+	2 => "^fg(red)",
+
+);
+%vol_fg =
+(
+	off => "",
+	on => "^fg(red)",
+);
+
+open DZEN2, "| dzen2 -xs $screen -ta r -fn $font";
+while (1)
+{
+	`apm -l -b` =~ /([0-9]+)\n([0-9]+)/m;
+	$bat_perc = $2 . "%";
+	$bat_status = $1;
+	
+	`mixerctl -n outputs.master outputs.master.mute` =~ /([0-91]+)\,[0-9]+\n(off|on)/;
+	$vol_perc = $1;
+	$vol_mute = $2;
+
+	($time_m, $time_h) = (localtime)[1,2];
+
+	print DZEN2 (
+	"vol:$vol_fg{$vol_mute}$vol_perc^fg() ",
+	"bat:$bat_fg{$bat_status}$bat_perc^fg() ",
+	"^fg(white)[$time_h:$time_m]^fg()\n",
+	);
+
+	flush DZEN2;
+	sleep 1;
+}
+close DZEN2;

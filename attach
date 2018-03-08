@@ -1,0 +1,20 @@
+#!/usr/bin/perl -w
+
+$devclass=$ARGV[0];
+$devname=$ARGV[1];
+$mountroot="/mnt";
+
+$uid="elecon";
+
+exit unless $devclass == 2;
+for (`disklabel $devname`)
+{
+	/^ +([abd-z]): +\d+ +\d+ +([a-zA-Z0-9.]+)/ || next;
+	($slice, $fstype) = ($1, $2);
+
+	if ($fstype =~ /MSDOS/)
+	{
+		mkdir "$mountroot/$devname$slice",0755;
+		`mount -o -u=$uid /dev/$devname$slice $mountroot/$devname$slice`;
+	}
+}
