@@ -1,0 +1,30 @@
+#!/bin/ksh
+
+# Specify the ssh host the way it's named in ssh_config
+SSH_HOST=example.com
+
+export AUTOSSH_PIDFILE="/var/run/autossh_$SSH_HOST.pid"
+
+daemon_env=$(env | grep AUTOSSH | tr '\n' ' ')
+
+daemon="/usr/local/bin/autossh"
+daemon_flags="-f -M 0 -N $SSH_HOST"
+ 
+. /etc/rc.d/rc.subr
+
+rc_check() {
+	[ -f $AUTOSSH_PIDFILE ] && \
+		ps -p $(cat $AUTOSSH_PIDFILE) \
+		> /dev/null
+}
+
+rc_start() {
+	${rcexec} "${daemon_env} ${daemon} ${daemon_flags}"	
+}
+
+rc_stop() {
+	[ -f $AUTOSSH_PIDFILE ] && \
+		kill $(cat $AUTOSSH_PIDFILE)
+}
+
+rc_cmd $1
